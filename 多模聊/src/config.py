@@ -8,6 +8,8 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 DEFAULT_CONFIG = {
     "default_model": "deepseek/v4",
     "api_keys": {},
+    "max_history_messages": 10,
+    "max_output_tokens": 2048,
     "models": {
         "openai/gpt-4o": {"backend": "openai", "model": "gpt-4o"},
         "openai/gpt-4.1": {"backend": "openai", "model": "gpt-4.1"},

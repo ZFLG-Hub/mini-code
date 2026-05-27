@@ -4,8 +4,8 @@ from .base import BaseBackend
 
 
 class GeminiBackend(BaseBackend):
-    def __init__(self, model_name, api_key):
-        super().__init__(model_name)
+    def __init__(self, model_name, api_key, max_tokens=4096):
+        super().__init__(model_name, max_tokens)
         self.api_key = api_key
         self.client = genai.Client(api_key=api_key) if api_key else None
 
@@ -17,6 +17,7 @@ class GeminiBackend(BaseBackend):
         response = self.client.models.generate_content_stream(
             model=self.model_name,
             contents=contents,
+            config={"max_output_tokens": self.max_tokens},
         )
         for chunk in response:
             if chunk.text:

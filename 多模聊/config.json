@@ -1,5 +1,7 @@
 {
     "default_model": "openai/gpt-4o",
+    "max_history_messages": 10,
+    "max_output_tokens": 2048,
     "models": {
         "openai/gpt-4o": {
             "backend": "openai",

@@ -4,8 +4,8 @@ from .base import BaseBackend
 
 
 class ClaudeBackend(BaseBackend):
-    def __init__(self, model_name, api_key):
-        super().__init__(model_name)
+    def __init__(self, model_name, api_key, max_tokens=4096):
+        super().__init__(model_name, max_tokens)
         self.api_key = api_key
         self.client = Anthropic(api_key=api_key) if api_key else None
 
@@ -24,7 +24,7 @@ class ClaudeBackend(BaseBackend):
         kwargs = dict(
             model=self.model_name,
             messages=chat_messages,
-            max_tokens=8192,
+            max_tokens=self.max_tokens,
             stream=stream,
         )
         if system_prompt:

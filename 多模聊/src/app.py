@@ -64,10 +64,12 @@ class App:
             self._interrupted = False
             original_handler = signal.signal(signal.SIGINT, self._sigint_handler)
 
+            messages = self._prepare_messages(self.session["messages"])
+
             collected = []
             with Live(Text(""), console=console, refresh_per_second=20, transient=False) as live:
                 try:
-                    for chunk in self.backend.chat(self.session["messages"], stream=True):
+                    for chunk in self.backend.chat(messages, stream=True):
                         if self._interrupted:
                             break
                         collected.append(chunk)
@@ -255,6 +257,16 @@ class App:
         console.print("[dim]再见![/]")
         sys.exit(0)
 
+    def _prepare_messages(self, messages):
+        max_history = self.config.get("max_history_messages", 20)
+        if len(messages) <= max_history:
+            return messages
+
+        system_msgs = [m for m in messages if m["role"] == "system"]
+        other_msgs = [m for m in messages if m["role"] != "system"]
+        trimmed = other_msgs[-max_history:]
+        return system_msgs + trimmed
+
     def _switch_model(self, model_key):
         info = cfg.get_model_info(self.config, model_key)
         if not info:
@@ -267,17 +279,18 @@ class App:
                 f"[yellow]警告: 未设置 {info['backend']} 的 API Key，使用 /key 设置[/]"
             )
 
+        max_tokens = self.config.get("max_output_tokens", 4096)
         backend_cls = BACKEND_CLASSES[info["backend"]]
-        self.backend = backend_cls(info["model"], api_key)
+        self.backend = backend_cls(info["model"], api_key, max_tokens)
         self.current_model_key = model_key
 
     def _print_banner(self):
         banner = """
-╔══════════════════════════════════════╗
-║         多模聊 — 多模型聊天工具       ║
-╠══════════════════════════════════════╣
-║  支持: OpenAI/Claude/Gemini/DeepSeek ║
-║  输入 /help 查看命令                ║
-╚══════════════════════════════════════╝
++--------------------------------------+
+|       多模聊 -- 多模型聊天工具        |
++--------------------------------------+
+|  支持: OpenAI/Claude/Gemini/DeepSeek |
+|  输入 /help 查看命令                 |
++--------------------------------------+
 """
         console.print(banner, style="bold cyan")

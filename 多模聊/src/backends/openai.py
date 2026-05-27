@@ -4,8 +4,8 @@ from .base import BaseBackend
 
 
 class OpenAIBackend(BaseBackend):
-    def __init__(self, model_name, api_key):
-        super().__init__(model_name)
+    def __init__(self, model_name, api_key, max_tokens=4096):
+        super().__init__(model_name, max_tokens)
         self.api_key = api_key
         self.client = OpenAI(api_key=api_key) if api_key else None
 
@@ -15,6 +15,7 @@ class OpenAIBackend(BaseBackend):
         response = self.client.chat.completions.create(
             model=self.model_name,
             messages=messages,
+            max_tokens=self.max_tokens,
             stream=stream,
         )
         if stream:
